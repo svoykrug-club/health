@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Score — SVOY KRUG</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C; --gold-light:#e8c97a; --gold-dim:#8a6d2f;
+  --dark:#0a0a0a; --dark2:#111; --dark3:#181818; --dark4:#1f1f1f;
+  --text:#d8d0c0; --muted:#7a7060; --white:#fff;
+  --red:#c07060; --amber:#c9944c; --green:#6aaa6a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--dark);color:var(--text);font-family:'Montserrat',sans-serif;font-weight:400;min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── INTRO ── */
+#intro{align-items:center;justify-content:center;text-align:center;padding:40px 24px;position:relative;}
+#intro::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.07) 0%,transparent 70%);pointer-events:none;}
+.brand-top{font-size:10px;font-weight:700;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:48px;}
+.intro-badge{display:inline-block;font-size:9px;font-weight:600;letter-spacing:3px;color:var(--gold);border:1px solid var(--gold-dim);padding:5px 16px;text-transform:uppercase;margin-bottom:20px;}
+.intro-title{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,10vw,80px);font-weight:300;color:var(--white);line-height:1;letter-spacing:2px;margin-bottom:8px;}
+.intro-title em{color:var(--gold);font-style:italic;}
+.intro-sub{font-size:10px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:28px;}
+.intro-desc{max-width:460px;margin:0 auto 36px;font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:#888;line-height:1.8;}
+.zones-preview{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:40px;}
+.zone-chip{font-size:10px;font-weight:600;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border:1px solid #2a2a2a;padding:5px 12px;}
+.btn-start{background:var(--gold);color:var(--dark);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;border:none;cursor:pointer;padding:16px 44px;transition:background .2s,transform .15s;}
+.btn-start:hover{background:var(--gold-light);transform:translateY(-1px);}
+.intro-note{margin-top:18px;font-size:10px;color:#444;letter-spacing:1px;}
+
+/* ── QUIZ ── */
+#quiz{padding:0;}
+.quiz-header{background:var(--dark2);border-bottom:1px solid #1e1e1e;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.quiz-brand{font-size:10px;font-weight:700;letter-spacing:4px;color:var(--gold);}
+.progress-wrap{flex:1;}
+.progress-track{height:2px;background:#1e1e1e;}
+.progress-fill{height:100%;background:var(--gold);transition:width .4s cubic-bezier(.4,0,.2,1);}
+.progress-label{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;}
+.quiz-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;max-width:620px;margin:0 auto;width:100%;animation:fadeIn .35s ease;}
+.q-zone{font-size:9px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;}
+.q-num{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--muted);margin-bottom:4px;}
+.q-text{font-family:'Cormorant Garamond',serif;font-size:clamp(20px,4vw,26px);font-weight:400;color:var(--white);line-height:1.4;margin-bottom:28px;}
+.answers{display:flex;flex-direction:column;gap:9px;}
+.answer-btn{background:var(--dark3);border:1px solid #252525;color:var(--text);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:400;text-align:left;padding:13px 16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:12px;}
+.answer-btn:hover{border-color:var(--gold-dim);background:var(--dark4);}
+.answer-btn.selected{border-color:var(--gold);background:#1a1500;color:var(--gold-light);}
+.answer-btn.selected .ans-dot{background:var(--gold);}
+.ans-dot{width:6px;height:6px;border-radius:50%;background:#333;flex-shrink:0;transition:background .15s;}
+.quiz-nav{padding:18px 24px;border-top:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center;max-width:620px;margin:0 auto;width:100%;}
+.btn-nav{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;border:none;cursor:pointer;padding:10px 22px;transition:all .15s;}
+.btn-back{background:transparent;color:var(--muted);border:1px solid #2a2a2a;}
+.btn-back:hover{border-color:var(--muted);color:var(--text);}
+.btn-next{background:var(--gold);color:var(--dark);}
+.btn-next:hover{background:var(--gold-light);}
+.btn-next:disabled{background:#2a2a2a;color:var(--muted);cursor:not-allowed;}
+
+/* ── RESULTS ── */
+#results{overflow-y:auto;}
+.results-hero{background:var(--dark2);border-bottom:3px solid var(--gold);padding:32px 24px 26px;text-align:center;}
+.results-brand{font-size:10px;font-weight:700;letter-spacing:5px;color:var(--gold);margin-bottom:18px;}
+.score-ring{width:120px;height:120px;margin:0 auto 14px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:#1e1e1e;stroke-width:6;}
+.score-ring-fill{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-num .big{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--white);font-weight:300;line-height:1;}
+.score-num .sm{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.score-label{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--white);margin-bottom:6px;}
+.score-desc{font-size:12px;color:var(--muted);line-height:1.6;max-width:340px;margin:0 auto;}
+
+/* ── ZONE BLOCKS ── */
+.results-body{padding:24px 20px 0;max-width:640px;margin:0 auto;width:100%;}
+.section-label{font-size:9px;font-weight:700;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin:28px 0 14px;}
+
+.zone-block{background:var(--dark3);border:1px solid #222;margin-bottom:10px;overflow:hidden;}
+.zone-block-header{padding:14px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.zone-block-header:hover .zone-block-name{color:var(--gold-light);}
+.zone-block-name{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);transition:color .15s;}
+.zone-block-meta{display:flex;align-items:center;gap:10px;}
+.zone-pct{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--white);}
+.zone-toggle{font-size:10px;color:var(--muted);transition:transform .25s;}
+.zone-toggle.open{transform:rotate(180deg);}
+.zone-bar-wrap{height:2px;background:#1a1a1a;margin:0 16px 14px;}
+.zone-bar{height:100%;transition:width 1s cubic-bezier(.4,0,.2,1);}
+
+.zone-detail{display:none;border-top:1px solid #1e1e1e;}
+.zone-detail.open{display:block;}
+
+/* Level badge */
+.level-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;margin:14px 16px 0;}
+.level-green{background:rgba(106,170,106,.15);color:#6aaa6a;border:1px solid rgba(106,170,106,.3);}
+.level-amber{background:rgba(201,148,76,.15);color:#c9944c;border:1px solid rgba(201,148,76,.3);}
+.level-red{background:rgba(192,112,96,.15);color:#c07060;border:1px solid rgba(192,112,96,.3);}
+
+.zone-summary{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:#999;padding:8px 16px 0;line-height:1.6;}
+
+/* Mini-protocol */
+.mini-protocol{padding:14px 16px 16px;}
+.mp-title{font-size:9px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.mp-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #1e1e1e;align-items:flex-start;}
+.mp-item:last-child{border-bottom:none;padding-bottom:0;}
+.mp-num{width:20px;height:20px;background:var(--dark4);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:1px;}
+.mp-text{font-size:12px;color:#aaa;line-height:1.6;}
+.mp-text strong{color:var(--text);}
+.mp-text em{color:var(--gold);font-style:normal;font-weight:600;}
+
+/* ── OVERALL RECS ── */
+.overall-recs{margin-bottom:24px;}
+.rec-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #1a1a1a;align-items:flex-start;}
+.rec-item:last-child{border-bottom:none;}
+.rec-icon{width:24px;height:24px;background:var(--dark4);border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.rec-text{font-size:12px;color:#aaa;line-height:1.6;}
+.rec-text strong{color:var(--text);}
+
+/* ── CTA ── */
+.cta-block{background:linear-gradient(135deg,#1a1500,#0f0f0f);border:1px solid var(--gold-dim);padding:22px 20px;text-align:center;margin:24px 0;}
+.cta-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--white);margin-bottom:6px;}
+.cta-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;}
+.btn-cta{background:var(--gold);color:var(--dark);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;border:none;cursor:pointer;padding:13px 32px;}
+.btn-restart{width:100%;background:transparent;border:1px solid #2a2a2a;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:12px;cursor:pointer;margin-bottom:32px;transition:border-color .2s,color .2s;}
+.btn-restart:hover{border-color:var(--muted);color:var(--text);}
+.results-footer{text-align:center;padding:0 0 32px;font-size:10px;color:#2a2a2a;letter-spacing:3px;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.answer-btn{animation:fadeIn .3s ease both;}
+.answer-btn:nth-child(1){animation-delay:.04s;}
+.answer-btn:nth-child(2){animation-delay:.09s;}
+.answer-btn:nth-child(3){animation-delay:.14s;}
+.answer-btn:nth-child(4){animation-delay:.19s;}
+.zone-block{animation:fadeIn .4s ease both;}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="brand-top">SVOY KRUG</div>
+  <div class="intro-badge">Biohacking Track</div>
+  <h1 class="intro-title">HEALTH<br><em>SCORE</em></h1>
+  <div class="intro-sub">Диагностика мужского здоровья</div>
+  <p class="intro-desc">Ответьте на 20 вопросов и получите персональные рекомендации по каждой зоне вашего здоровья.</p>
+  <div class="zones-preview">
+    <div class="zone-chip">Гормоны</div>
+    <div class="zone-chip">Энергия</div>
+    <div class="zone-chip">Тело</div>
+    <div class="zone-chip">Сон</div>
+    <div class="zone-chip">Стресс</div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">НАЧАТЬ ДИАГНОСТИКУ</button>
+  <div class="intro-note">~3 минуты · 20 вопросов · Без регистрации</div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-brand">SVOY KRUG</div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label" id="progressLabel">Вопрос 1 из 20</div>
+    </div>
+  </div>
+  <div class="quiz-body" id="quizBody">
+    <div class="q-zone" id="qZone"></div>
+    <div class="q-num" id="qNum"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="answers" id="answers"></div>
+  </div>
+  <div class="quiz-nav">
+    <button class="btn-nav btn-back" id="btnBack" onclick="prevQ()">← Назад</button>
+    <button class="btn-nav btn-next" id="btnNext" onclick="nextQ()" disabled>Далее →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-hero">
+    <div class="results-brand">SVOY KRUG · HEALTH SCORE</div>
+    <div class="score-ring">
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <circle class="score-ring-bg" cx="60" cy="60" r="54"/>
+        <circle class="score-ring-fill" id="scoreRingFill" cx="60" cy="60" r="54" stroke-dasharray="339.3" stroke-dashoffset="339.3"/>
+      </svg>
+      <div class="score-num">
+        <span class="big" id="scoreBig">0</span>
+        <span class="sm">из 100</span>
+      </div>
+    </div>
+    <div class="score-label" id="scoreLabel"></div>
+    <div class="score-desc" id="scoreDesc"></div>
+  </div>
+  <div class="results-body">
+    <div class="section-label">Разбивка по зонам</div>
+    <div id="zonesGrid"></div>
+    <div class="section-label">Главные приоритеты</div>
+    <div class="overall-recs" id="overallRecs"></div>
+    <div class="cta-block">
+      <div class="cta-title">Следующий шаг — полный протокол</div>
+      <div class="cta-sub">Протокол Т — конкретные анализы, добавки и план на 90 дней под ваш профиль.</div>
+      <button class="btn-cta">ПОЛУЧИТЬ ПРОТОКОЛ Т</button>
+    </div>
+    <button class="btn-restart" onclick="restart()">ПРОЙТИ ЕЩЁ РАЗ</button>
+    <div class="results-footer">SVOY KRUG · SVOY KRUG · SVOY KRUG</div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// QUESTIONS
+// ─────────────────────────────────────────────────────────
+const QUESTIONS = [
+  {zone:'hormones',text:'Как бы вы оценили своё либидо за последние 3 месяца?',opts:[
+    {t:'Высокое — всё как в 25',s:4},{t:'Нормальное, но не как раньше',s:3},
+    {t:'Заметно снизилось',s:2},{t:'Практически отсутствует',s:0}]},
+  {zone:'hormones',text:'Насколько легко вам набирать мышечную массу?',opts:[
+    {t:'Хорошо — мышцы растут при нагрузке',s:4},{t:'Нормально, но медленнее чем раньше',s:3},
+    {t:'Очень медленно, несмотря на усилия',s:1},{t:'Не занимаюсь',s:2}]},
+  {zone:'hormones',text:'Есть ли жир в области живота и груди, который не уходит?',opts:[
+    {t:'Нет, живот плоский',s:4},{t:'Немного есть, но не критично',s:3},
+    {t:'Да, и это заметно',s:1},{t:'Значительный лишний вес в этих зонах',s:0}]},
+  {zone:'hormones',text:'Как часто бывают утренние эрекции?',opts:[
+    {t:'Почти каждое утро',s:4},{t:'Несколько раз в неделю',s:3},
+    {t:'Редко, раз в неделю или реже',s:1},{t:'Практически никогда',s:0}]},
+
+  {zone:'energy',text:'Какой у вас уровень энергии в первой половине дня?',opts:[
+    {t:'Отличный — заряжен с утра',s:4},{t:'Нормальный, но нужен кофе',s:3},
+    {t:'Вялый даже после сна',s:1},{t:'Постоянная усталость с утра',s:0}]},
+  {zone:'energy',text:'Бывает ли резкий упадок сил после обеда?',opts:[
+    {t:'Нет, энергия стабильна',s:4},{t:'Иногда, но быстро проходит',s:3},
+    {t:'Почти каждый день',s:1},{t:'Сильный упадок, хочется лечь спать',s:0}]},
+  {zone:'energy',text:'Как быстро восстанавливаетесь после физических нагрузок?',opts:[
+    {t:'Быстро — за 24–48 часов',s:4},{t:'За 2–3 дня, нормально',s:3},
+    {t:'Долго, больше 3 дней',s:1},{t:'Не занимаюсь физически',s:2}]},
+  {zone:'energy',text:'Насколько вы мотивированы и вовлечены в работу / проекты?',opts:[
+    {t:'Высокая мотивация, горю делом',s:4},{t:'Нормально, работаю продуктивно',s:3},
+    {t:'Часто не хочется ничего делать',s:1},{t:'Апатия, всё безразлично',s:0}]},
+
+  {zone:'body',text:'Как часто занимаетесь силовыми тренировками?',opts:[
+    {t:'3–5 раз в неделю',s:4},{t:'1–2 раза в неделю',s:3},
+    {t:'Редко, менее раза в неделю',s:1},{t:'Не занимаюсь',s:0}]},
+  {zone:'body',text:'Как бы вы оценили своё питание?',opts:[
+    {t:'Осознанное — слежу за составом',s:4},{t:'В целом нормальное',s:3},
+    {t:'Хаотичное, часто фастфуд',s:1},{t:'Питаюсь плохо, понимаю это',s:0}]},
+  {zone:'body',text:'Какой у вас объём талии?',opts:[
+    {t:'До 90 см',s:4},{t:'90–95 см',s:3},
+    {t:'95–100 см',s:1},{t:'Больше 100 см',s:0}]},
+  {zone:'body',text:'Как часто употребляете алкоголь?',opts:[
+    {t:'Не пью или крайне редко',s:4},{t:'1–2 раза в неделю, умеренно',s:3},
+    {t:'Несколько раз в неделю',s:1},{t:'Ежедневно',s:0}]},
+
+  {zone:'sleep',text:'Сколько часов спите в среднем?',opts:[
+    {t:'7–9 часов',s:4},{t:'6–7 часов',s:3},
+    {t:'5–6 часов',s:1},{t:'Меньше 5 часов',s:0}]},
+  {zone:'sleep',text:'Как просыпаетесь?',opts:[
+    {t:'Сам, отдохнувшим, без будильника',s:4},{t:'По будильнику, чувствую себя нормально',s:3},
+    {t:'Тяжело встаю, не отдыхаю',s:1},{t:'Постоянно разбитый, хочется ещё спать',s:0}]},
+  {zone:'sleep',text:'Есть ли проблемы с засыпанием или ночными пробуждениями?',opts:[
+    {t:'Нет — засыпаю быстро, сплю крепко',s:4},{t:'Иногда бывает, но редко',s:3},
+    {t:'Часто плохо сплю',s:1},{t:'Хроническая бессонница',s:0}]},
+  {zone:'sleep',text:'Ложитесь ли спать до полуночи?',opts:[
+    {t:'Да, регулярно до 23:00',s:4},{t:'Иногда, не всегда',s:3},
+    {t:'Чаще после полуночи',s:1},{t:'Сплю очень поздно, после 1–2 ночи',s:0}]},
+
+  {zone:'stress',text:'Как оцениваете уровень хронического стресса?',opts:[
+    {t:'Низкий — умею управлять стрессом',s:4},{t:'Умеренный, справляюсь',s:3},
+    {t:'Высокий, постоянное напряжение',s:1},{t:'Очень высокий, на грани',s:0}]},
+  {zone:'stress',text:'Есть ли регулярные практики восстановления (баня, медитация, природа)?',opts:[
+    {t:'Да, регулярно несколько практик',s:4},{t:'Иногда, от случая к случаю',s:3},
+    {t:'Редко или никогда',s:1},{t:'Нет, некогда об этом думать',s:0}]},
+  {zone:'stress',text:'Бывают ли перепады настроения, раздражительность без причины?',opts:[
+    {t:'Нет — настроение стабильное',s:4},{t:'Иногда, это нормально',s:3},
+    {t:'Часто раздражён или подавлен',s:1},{t:'Постоянная тревога или депрессия',s:0}]},
+  {zone:'stress',text:'Сдавали ли анализы на тестостерон за последний год?',opts:[
+    {t:'Да, знаю свои показатели',s:4},{t:'Нет, но планирую',s:2},
+    {t:'Никогда не сдавал',s:1},{t:'Не считаю нужным',s:0}]},
+];
+
+// ─────────────────────────────────────────────────────────
+// ZONE RECOMMENDATIONS by score level
+// ─────────────────────────────────────────────────────────
+const ZONE_DATA = {
+  hormones: {
+    name: 'ГОРМОНЫ',
+    color: '#C9A84C',
+    levels: {
+      green: {
+        label: 'Норма',
+        summary: 'Гормональный фон в хорошем состоянии. Задача — удержать и оптимизировать.',
+        steps: [
+          {t:'<strong>Сдавайте панель раз в год</strong> — тест общий и свободный, ГСПГ, эстрадиол. Даже при хорошем самочувствии важно иметь базовые значения.'},
+          {t:'<strong>Бор 6–10 мг/день</strong> — снижает ГСПГ и немного поднимает свободный тест даже при нормальных значениях. Недооценённый инструмент.'},
+          {t:'<strong>Поддерживайте жир в рационе:</strong> 35–40% калорий из насыщенных и мононенасыщенных жиров — яйца, говядина, авокадо, оливковое масло.'},
+        ]
+      },
+      amber: {
+        label: 'Есть снижение',
+        summary: 'Признаки субоптимального уровня тестостерона. Стоит разобраться с причиной до того, как станет хуже.',
+        steps: [
+          {t:'<strong>Сдайте диагностическую панель:</strong> тест общий и свободный, ГСПГ, ЛГ, ФСГ, эстрадиол, пролактин, ТТГ. Без данных — работа вслепую.'},
+          {t:'<strong>Цинк 25–30 мг/день (бисглицинат) + Витамин D3 5000 МЕ</strong> — эти два дефицита встречаются у 60–70% мужчин и напрямую снижают тест.'},
+          {t:'<strong>Исключите главных врагов:</strong> алкоголь даже 2–3 раза в неделю снижает тест на 6–23%. Сахар — поднимает инсулин, который давит на тест.'},
+          {t:'<strong>Ашваганда KSM-66, 600 мг</strong> курсом 8 недель — снижает кортизол на 27–30%, что косвенно поднимает тест.'},
+        ]
+      },
+      red: {
+        label: 'Требует внимания',
+        summary: 'Высокая вероятность клинически низкого тестостерона. Нужна диагностика и, возможно, медицинская помощь.',
+        steps: [
+          {t:'<strong>Первый шаг — к врачу.</strong> Эндокринолог или уролог. Сдать расширенную панель: тест + ГСПГ + ЛГ + ФСГ + эстрадиол + пролактин + ТТГ + инсулин натощак.'},
+          {t:'<strong>Пока ждёте результатов:</strong> уберите алкоголь полностью, добавьте D3+K2 (10 000 МЕ) + магний глицинат (400 мг ночью) + цинк (30 мг).'},
+          {t:'<strong>Сон — критически важен.</strong> 70% тестостерона вырабатывается ночью. Лечь до 23:00, темнота, 18°C — это не опция, это лечение.'},
+          {t:'<strong>При тест < 300 нг/дл</strong> — обсудите с врачом ЗГТ (заместительную гормональную терапию). Не самолечение — работа со специалистом.'},
+        ]
+      }
+    }
+  },
+  energy: {
+    name: 'ЭНЕРГИЯ',
+    color: '#d4a843',
+    levels: {
+      green: {
+        label: 'Отличный уровень',
+        summary: 'Энергия стабильна. Фокус — на митохондриальной оптимизации для долгосрочного эффекта.',
+        steps: [
+          {t:'<strong>Коэнзим Q10 (убихинол) 200 мг</strong> — поддерживает митохондрии, особенно актуально после 35. Убихинол усваивается в 3× лучше убихинона.'},
+          {t:'<strong>Периодическое голодание 16/8</strong> — улучшает митохондриальный биогенез, стабилизирует инсулин и даёт устойчивую энергию без пиков и спадов.'},
+          {t:'<strong>Контролируйте кофеин:</strong> не более 200–300 мг/день и не после 14:00. Кофеин позже вечера разрушает фазы глубокого сна и энергию следующего дня.'},
+        ]
+      },
+      amber: {
+        label: 'Нестабильная',
+        summary: 'Энергетические спады говорят о дефицитах или нарушении регуляции. Поддаётся коррекции за 4–6 недель.',
+        steps: [
+          {t:'<strong>Проверьте: D3, ферритин, B12, магний.</strong> Это «большая четвёрка» дефицитов, которые вызывают хроническую усталость. Сдать анализ крови.'},
+          {t:'<strong>Магний глицинат 400–600 мг на ночь</strong> — улучшает качество сна и стабилизирует энергию в течение дня. Результат заметен через 10–14 дней.'},
+          {t:'<strong>Пересмотрите завтрак:</strong> белок + жиры вместо углеводов. Яйца + авокадо дают стабильную энергию без инсулинового пика и послеобеденного провала.'},
+          {t:'<strong>Силовые тренировки</strong> парадоксально повышают долгосрочную энергию — за счёт роста митохондрий в мышцах. 3× в неделю, 45 мин.'},
+        ]
+      },
+      red: {
+        label: 'Критически низкая',
+        summary: 'Хроническая усталость — это симптом, а не норма. Нужен системный поиск причины.',
+        steps: [
+          {t:'<strong>Расширенный анализ крови:</strong> ОАК, ферритин, B12, D3, ТТГ, инсулин натощак, кортизол утренний. Усталость может быть анемией, гипотиреозом или надпочечниками.'},
+          {t:'<strong>Уберите всё, что крадёт энергию:</strong> алкоголь, сахар, поздний сон, более 300 мг кофеина. Эти четыре фактора часто объясняют 80% проблемы.'},
+          {t:'<strong>Стек восстановления:</strong> D3 10 000 МЕ + магний 600 мг + B-комплекс + Омега-3 3 г/день. Начните параллельно с диагностикой.'},
+          {t:'<strong>Режим дня как лекарство:</strong> подъём в одно время (даже в выходные), еда каждые 4–5 часов, прогулка 20 мин после обеда. Простые ритмы работают.'},
+        ]
+      }
+    }
+  },
+  body: {
+    name: 'ТЕЛО',
+    color: '#b89038',
+    levels: {
+      green: {
+        label: 'Хорошая форма',
+        summary: 'Тело в хорошем состоянии. Задача — поддерживать систему и добавлять точечную оптимизацию.',
+        steps: [
+          {t:'<strong>Добавьте 1–2 HIIT-сессии в неделю</strong> — интервальные тренировки мощно стимулируют тест и гормон роста. 20–25 мин достаточно.'},
+          {t:'<strong>Отслеживайте объём талии</strong> — он точнее ИМТ отражает висцеральный жир и ароматазную активность. Цель: до 90 см.'},
+          {t:'<strong>Устрицы или цинк-бисглицинат</strong> — цинк блокирует ароматазу, которая конвертирует тест в эстроген. Актуально даже при хорошей форме.'},
+        ]
+      },
+      amber: {
+        label: 'Есть зоны роста',
+        summary: 'Тело работает, но не оптимально. Небольшие системные изменения дадут заметный результат за 2–3 месяца.',
+        steps: [
+          {t:'<strong>3 силовые тренировки в неделю — минимум.</strong> Приседания и становая тяга важнее любой добавки: вызывают острый пик тестостерона на 15–30%.'},
+          {t:'<strong>Убрать висцеральный жир — приоритет.</strong> Жировая ткань содержит ароматазу. Каждый кг живота = больше эстрогена. Дефицит калорий 300–400 ккал/день.'},
+          {t:'<strong>Белок 1.8 г/кг + жиры 35% калорий.</strong> Не урезать жиры ради похудения — они нужны для синтеза тестостерона. Убирайте углеводы, не жиры.'},
+          {t:'<strong>Алкоголь — договоритесь с собой.</strong> Даже умеренное потребление снижает синтез тест в яичках на 6–23% и повышает ароматазную активность.'},
+        ]
+      },
+      red: {
+        label: 'Требует системной работы',
+        summary: 'Тело сигнализирует. Нужен системный подход — не диета и не разовый марафон, а изменение уклада.',
+        steps: [
+          {t:'<strong>Начните с ходьбы — 8000–10 000 шагов в день.</strong> Это снижает кортизол, инсулин и висцеральный жир без стресса для организма. База для всего остального.'},
+          {t:'<strong>Один приём пищи убираем полностью</strong> — уберите перекусы между едой. 3 приёма, интервал 4–5 часов. Это нормализует инсулин за 2–3 недели.'},
+          {t:'<strong>Алкоголь — полная пауза на 30 дней.</strong> За месяц без алкоголя большинство мужчин замечают рост энергии, либидо и настроения. Проверьте на себе.'},
+          {t:'<strong>Силовые — 2 раза в неделю, только базовые упражнения.</strong> Присед, тяга, жим. По 3–4 подхода. Меньше, но регулярно — лучше, чем интенсивно и с перерывами.'},
+        ]
+      }
+    }
+  },
+  sleep: {
+    name: 'СОН',
+    color: '#a07830',
+    levels: {
+      green: {
+        label: 'Качественный',
+        summary: 'Сон — фундамент гормонального здоровья — у вас в порядке. Оставайтесь в этом режиме.',
+        steps: [
+          {t:'<strong>Магний глицинат 400 мг на ночь</strong> — даже при хорошем сне углубляет фазу 3–4 NREM, когда вырабатывается 70% суточного тестостерона.'},
+          {t:'<strong>Поддерживайте температуру спальни 17–19°C</strong> — это оптимальный диапазон для глубокого сна. Тело охлаждается и запускает восстановительные процессы.'},
+          {t:'<strong>Трекинг сна раз в месяц</strong> (Oura, Apple Watch, Whoop) — держит вас в курсе качества без навязчивого контроля.'},
+        ]
+      },
+      amber: {
+        label: 'Нестабильный',
+        summary: 'Нарушения сна напрямую снижают тестостерон. Неделя плохого сна = -15% гормона.',
+        steps: [
+          {t:'<strong>Жёсткое время отбоя: 22:30–23:00.</strong> Каждые 30 мин сна до полуночи в 2× ценнее сна после. Мозг вырабатывает мелатонин с 21:00 — не перебивайте его светом.'},
+          {t:'<strong>Экраны — за час до сна.</strong> Синий свет блокирует мелатонин до 3 часов. Замените на чтение, разговор, баню. Даже очки blue-light помогают.'},
+          {t:'<strong>Магний глицинат 400 мг + L-теанин 200 мг</strong> за 30–40 мин до сна. Снижают кортизол и помогают перейти в парасимпатику.'},
+          {t:'<strong>Утренний свет в первые 30 мин</strong> после пробуждения — 10 мин на улице или у яркого окна. Это синхронизирует циркадный ритм и улучшает сон следующей ночью.'},
+        ]
+      },
+      red: {
+        label: 'Критически нарушен',
+        summary: 'Хроническое нарушение сна — это медицинская проблема, не просто усталость. Влияет на всё: тест, иммунитет, метаболизм, психику.',
+        steps: [
+          {t:'<strong>Исключите апноэ сна</strong> — если храпите, просыпаетесь уставшим, или партнёр замечал остановки дыхания. Апноэ резко снижает тест и вызывает все симптомы дефицита.'},
+          {t:'<strong>Полный отказ от алкоголя перед сном.</strong> Алкоголь разрушает REM-сон и фазу восстановления. Даже один бокал вина за 2–3 часа до сна ухудшает его качество на 25%.'},
+          {t:'<strong>Установите абсолютное правило:</strong> подъём в одно время 7 дней в неделю. Это самый быстрый способ восстановить циркадный ритм — за 10–14 дней.'},
+          {t:'<strong>Стек для сна:</strong> магний глицинат 600 мг + ашваганда 300 мг + L-теанин 200 мг. При хронической бессоннице — консультация сомнолога или невролога.'},
+        ]
+      }
+    }
+  },
+  stress: {
+    name: 'СТРЕСС',
+    color: '#8a6428',
+    levels: {
+      green: {
+        label: 'Под контролем',
+        summary: 'Стресс управляем. Поддерживайте практики восстановления — это ваш главный актив.',
+        steps: [
+          {t:'<strong>Баня 2× в неделю</strong> — снижает кортизол, активирует парасимпатику. После 3–4 заходов по 15 мин тело выходит в глубокое восстановление.'},
+          {t:'<strong>Кортизол сдавайте раз в год</strong> (утренний, в 8:00). Даже при хорошем самочувствии скрытый хронический стресс можно поймать только анализом.'},
+          {t:'<strong>Адаптогены на стрессовые периоды:</strong> ашваганда KSM-66, 600 мг курсами 8 недель во время высокой нагрузки. Профилактика лучше лечения.'},
+        ]
+      },
+      amber: {
+        label: 'Повышенный',
+        summary: 'Хронический стресс — главный враг тестостерона. Кортизол и тест — прямые антагонисты. Снизить кортизол = поднять тест.',
+        steps: [
+          {t:'<strong>Ашваганда KSM-66, 600 мг/день</strong> курсом 8 недель — снижает кортизол на 27–30% по данным RCT. Это не плацебо, это биохимия.'},
+          {t:'<strong>Дыхание 4-7-8 перед сном:</strong> вдох 4 сек → задержка 7 сек → выдох 8 сек, 4 раза. Активирует парасимпатику за 2–3 минуты. Работает немедленно.'},
+          {t:'<strong>Введите «разгрузочный час»</strong> ежедневно — без телефона, без задач. Прогулка, баня, разговор. Мозг не умеет отдыхать в фоне — нужно выключить режим задач.'},
+          {t:'<strong>Ограничьте новостной поток</strong> — хроническое потребление тревожных новостей повышает кортизол так же, как реальный стресс. 15 мин в день максимум.'},
+        ]
+      },
+      red: {
+        label: 'Хронический',
+        summary: 'При таком уровне стресса ни одна добавка не даст полного эффекта. Снижение кортизола — задача №1 перед всем остальным.',
+        steps: [
+          {t:'<strong>Сдайте кортизол в слюне (4 точки за день)</strong> — это точнее, чем анализ крови. Показывает, как работает ось гипоталамус-гипофиз-надпочечники в течение суток.'},
+          {t:'<strong>Полная цифровая детоксикация 1 день в неделю</strong> — без соцсетей, мессенджеров, почты. Назовите это «воскресным протоколом». Первый месяц будет тяжело, потом — необходимо.'},
+          {t:'<strong>Медитация 10 мин каждое утро</strong> — снижает кортизол при регулярной практике. Приложения Insight Timer или Calm. Главное — каждый день, а не длительность сессии.'},
+          {t:'<strong>Пересмотрите нагрузку.</strong> Если стресс от работы/отношений — это не про добавки. Нужны структурные решения. Разговор с коучем или психологом — это не слабость, это инструмент.'},
+        ]
+      }
+    }
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// STATE & LOGIC
+// ─────────────────────────────────────────────────────────
+let current=0, answers=new Array(QUESTIONS.length).fill(null);
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function startQuiz(){
+  current=0; answers=new Array(QUESTIONS.length).fill(null);
+  renderQ(); show('quiz');
+}
+function restart(){ startQuiz(); }
+
+function renderQ(){
+  const q=QUESTIONS[current];
+  const pct=Math.round((current/QUESTIONS.length)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`Вопрос ${current+1} из ${QUESTIONS.length}`;
+  document.getElementById('qZone').textContent=ZONE_DATA[q.zone].name;
+  document.getElementById('qNum').textContent=`${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('qText').textContent=q.text;
+  const container=document.getElementById('answers');
+  container.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='answer-btn'+(answers[current]===i?' selected':'');
+    btn.innerHTML=`<span class="ans-dot"></span>${opt.t}`;
+    btn.onclick=()=>selectAnswer(i);
+    container.appendChild(btn);
+  });
+  document.getElementById('btnBack').style.visibility=current===0?'hidden':'visible';
+  document.getElementById('btnNext').disabled=answers[current]===null;
+  document.getElementById('btnNext').textContent=current===QUESTIONS.length-1?'Результат →':'Далее →';
+  const body=document.getElementById('quizBody');
+  body.style.animation='none'; body.offsetHeight; body.style.animation='';
+}
+function selectAnswer(idx){
+  answers[current]=idx;
+  document.querySelectorAll('.answer-btn').forEach((btn,i)=>btn.classList.toggle('selected',i===idx));
+  document.getElementById('btnNext').disabled=false;
+}
+function nextQ(){
+  if(answers[current]===null) return;
+  if(current<QUESTIONS.length-1){current++;renderQ();}
+  else showResults();
+}
+function prevQ(){ if(current>0){current--;renderQ();} }
+
+function getLevel(pct){ return pct>=75?'green':pct>=45?'amber':'red'; }
+function getLevelLabel(l){ return l==='green'?'Норма':l==='amber'?'Внимание':'Приоритет'; }
+function getLevelClass(l){ return 'level-'+l; }
+function getBarColor(l){ return l==='green'?'#6aaa6a':l==='amber'?'#c9944c':'#c07060'; }
+
+function toggleZone(id){
+  const detail=document.getElementById('detail-'+id);
+  const toggle=document.getElementById('toggle-'+id);
+  const isOpen=detail.classList.contains('open');
+  detail.classList.toggle('open',!isOpen);
+  toggle.classList.toggle('open',!isOpen);
+  toggle.textContent=isOpen?'▼':'▲';
+}
+
+function showResults(){
+  const zoneData={};
+  Object.keys(ZONE_DATA).forEach(z=>zoneData[z]={total:0,max:0});
+  QUESTIONS.forEach((q,i)=>{
+    const ai=answers[i];
+    if(ai!==null){zoneData[q.zone].total+=q.opts[ai].s; zoneData[q.zone].max+=4;}
+  });
+  const zonePcts={};
+  Object.keys(ZONE_DATA).forEach(z=>{ zonePcts[z]=Math.round((zoneData[z].total/zoneData[z].max)*100); });
+  const totalScore=Math.round(Object.values(zonePcts).reduce((a,b)=>a+b,0)/Object.keys(ZONE_DATA).length);
+
+  show('results');
+
+  // Ring animation
+  setTimeout(()=>{
+    const offset=339.3-(totalScore/100)*339.3;
+    document.getElementById('scoreRingFill').style.strokeDashoffset=offset;
+    let n=0;
+    const step=()=>{ n=Math.min(n+2,totalScore); document.getElementById('scoreBig').textContent=n; if(n<totalScore)requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  },100);
+
+  // Score label
+  const labels={
+    green:{label:'Отличное состояние',desc:'Ваш организм работает хорошо. Фокус — на удержании уровня и точечной оптимизации.'},
+    amber:{label:'Хорошая база',desc:'Есть зоны роста. Точечная работа по слабым звеньям даст заметный результат за 8–12 недель.'},
+    red:{label:'Требует внимания',desc:'Несколько систем работают ниже оптимума. Самое время начать протокол.'}
+  };
+  const overall=getLevel(totalScore);
+  document.getElementById('scoreLabel').textContent=labels[overall].label;
+  document.getElementById('scoreDesc').textContent=labels[overall].desc;
+
+  // Zone blocks with detailed recs
+  const zg=document.getElementById('zonesGrid');
+  zg.innerHTML='';
+  Object.entries(zonePcts).forEach(([z,pct],idx)=>{
+    const zd=ZONE_DATA[z];
+    const lvl=getLevel(pct);
+    const rec=zd.levels[lvl];
+    const barColor=getBarColor(lvl);
+    const block=document.createElement('div');
+    block.className='zone-block';
+    block.style.animationDelay=(idx*0.08)+'s';
+    block.innerHTML=`
+      <div class="zone-block-header" onclick="toggleZone('${z}')">
+        <div>
+          <div class="zone-block-name">${zd.name}</div>
+          <div class="zone-bar-wrap" style="margin:6px 0 0;">
+            <div class="zone-bar" data-w="${pct}" style="width:0%;background:${barColor}"></div>
+          </div>
+        </div>
+        <div class="zone-block-meta">
+          <div class="zone-pct">${pct}</div>
+          <div class="zone-toggle" id="toggle-${z}">▼</div>
+        </div>
+      </div>
+      <div class="zone-detail" id="detail-${z}">
+        <div style="padding:0 16px;">
+          <span class="level-badge ${getLevelClass(lvl)}">${rec.label}</span>
+        </div>
+        <div class="zone-summary">${rec.summary}</div>
+        <div class="mini-protocol">
+          <div class="mp-title">Что делать конкретно</div>
+          ${rec.steps.map((s,i)=>`
+            <div class="mp-item">
+              <div class="mp-num">${i+1}</div>
+              <div class="mp-text">${s.t}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    zg.appendChild(block);
+  });
+
+  setTimeout(()=>{
+    document.querySelectorAll('.zone-bar').forEach(b=>{ b.style.width=b.dataset.w+'%'; });
+    // Auto-open worst zone
+    const worst=Object.entries(zonePcts).sort((a,b)=>a[1]-b[1])[0][0];
+    toggleZone(worst);
+  },300);
+
+  // Overall top-3 priorities
+  const sorted=Object.entries(zonePcts).sort((a,b)=>a[1]-b[1]);
+  const recs={
+    hormones:{icon:'🧪',text:'<strong>Сдайте гормональную панель</strong> — тест общий и свободный, ГСПГ, ЛГ, ФСГ, эстрадиол. Без данных — работа вслепую.'},
+    energy:{icon:'⚡',text:'<strong>D3+K2 и Магний глицинат</strong> — дефицит этих двух нутриентов вызывает хроническую усталость у большинства мужчин 35–45.'},
+    body:{icon:'🏋',text:'<strong>3 силовые тренировки в неделю</strong> — приседания и становая дают острый пик тест лучше любой добавки.'},
+    sleep:{icon:'😴',text:'<strong>Режим сна: лечь до 23:00</strong> — 70% суточного тестостерона вырабатывается именно ночью. Это не опция, это лечение.'},
+    stress:{icon:'🧘',text:'<strong>Ашваганда KSM-66 и баня 2× в неделю</strong> — снижают кортизол, который блокирует тест сильнее любого дефицита.'},
+  };
+  const or=document.getElementById('overallRecs');
+  or.innerHTML='';
+  sorted.slice(0,3).forEach(([z])=>{
+    const r=recs[z];
+    const item=document.createElement('div');
+    item.className='rec-item';
+    item.innerHTML=`<div class="rec-icon">${r.icon}</div><div class="rec-text">${r.text}</div>`;
+    or.appendChild(item);
+  });
+}
+</script>
+</body>
+</html>
